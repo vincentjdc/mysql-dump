@@ -9,6 +9,7 @@ BAK_DB_HOST=${MYSQL_HOST:-db}
 BAK_DB_PORT=${MYSQL_PORT:-3306}
 BAK_DATABASES=${MYSQL_DATABASE:--A}
 RESERVE_NUM=${RESERVES:-7}
+BAK_GROUP=root
 # database server
 DUMP_TARGET=/backups
 
@@ -51,6 +52,11 @@ if [ $RET -ne 0 ]; then
   exit $RET
 else
   echo "$end: backup successful."
-  cd /backups && ls -lrt | head -n -$RESERVE_NUM | awk '{print $9}' | xargs rm -f
+  cd $DUMP_TARGET && ls -lrt | head -n -$RESERVE_NUM | awk '{print $9}' | xargs rm -f
+
+  if [ $BAK_GROUP -ne "root" ]; then
+    chgrp $BAK_GROUP $DUMP_TARGET/$TARGET
+  fi
+
   exit 0
 fi
